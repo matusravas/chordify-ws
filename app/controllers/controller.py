@@ -1,10 +1,11 @@
-from flask import jsonify, request
+from flask import Response, jsonify, request
 from typing import List
 import requests
 from bs4 import BeautifulSoup
 import json
 from app import app
 from app.dtos import SearchMatch
+import re
 
 
 BASE_URL = 'https://tabs.ultimate-guitar.com'
@@ -14,6 +15,13 @@ BASE_URL = 'https://tabs.ultimate-guitar.com'
 def hello_world():
     return "<p>Hello, World!</p>"
 
+
+def sort_fun(e):
+    if 'votes' in e and 'rating' in e:
+        return e['votes'] * e['rating']
+    else:  
+        return -1
+    
 
 @app.route('/songs')
 def search():
@@ -31,13 +39,14 @@ def search():
     path_search = f'https://www.ultimate-guitar.com/search.php?title={SEARCH_PHRASE}&type={TYPE}&page={PAGE}'
     page = requests.get(path_search)
 
-
+    # print(page.content)
     soup = BeautifulSoup(page.text, 'html.parser')
     div = soup.find("div", {'class': 'js-store'})
     s_content = div['data-content']
     results = json.loads(s_content)['store']['page']['data']['results']
+    results_sorted = sorted(results, key = sort_fun, reverse=True)
     search_matches: List[SearchMatch] = []
-    for result in results:
+    for result in results_sorted:
         result_type = result.get('type', None)
         if not result_type: 
             continue
@@ -76,13 +85,19 @@ def search_chords():
 
     div = soup.find("div", {'class': 'js-store'})
     s_content = div['data-content']
+    # print(s_content)
+    # with open('file.txt', 'w') as f:
+    #     f.write(s_content)
     result = json.loads(s_content)['store']['page']['data']['tab_view']['wiki_tab']['content']
 
     # print(repr(result.replace('[tab]', '').replace('[/tab]', '').replace('[ch]', '<b>').replace('[/ch]', '</b>')))
-    s_song = result.replace('[tab]', '').replace('[/tab]', '').replace('[ch]', '<b>').replace('[/ch]', '</b>')
-    # print()
+    # s_song = result.replace('[tab]', '').replace('[/tab]', '')#.replace('[ch]', '<b>').replace('[/ch]', '</b>')
+    # print(result)
+    # o = re.search('[ch](.*)[/ch]', result)
+    # print(o)
+    '<span class="fciXY _Oy28" data-name="A" style="color: rgb(0, 0, 0);">A</span>'
     
-    response = jsonify({'ok': True, 'data': s_song})
+    response = jsonify({'ok': True, 'data': result})
     response.status_code = 200
     return response
 
