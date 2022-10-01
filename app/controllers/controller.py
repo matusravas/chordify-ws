@@ -127,7 +127,7 @@ def search_chords():
                 </body>
                 </html>
                 '''
-    return {'ok': True, 'data': "html_page"} #render_template_string(html_page)
+    return {'ok': True, 'data': html_page} #render_template_string(html_page)
     return render_template_string(html_page)
 
 
