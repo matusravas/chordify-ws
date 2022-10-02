@@ -1,6 +1,7 @@
 import itertools
 import logging
 from flask import jsonify, request, render_template_string
+from flask_jwt_extended import jwt_required
 from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
@@ -9,6 +10,8 @@ from app import app
 from app.dtos import SearchMatch
 from app.dtos.dtos import SongMetaData
 import re
+
+from app.utils.helpers import authorize
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +22,8 @@ BASE_URL_TAB = 'https://tabs.ultimate-guitar.com/tab/'
 
 
 @app.route("/api", methods=['GET'])
+@authorize
+# @jwt_re
 def hello_world():
     return "<p>Hello, World!</p>"
 
@@ -38,6 +43,7 @@ def sort_fun_hits(e: Dict):
     
 
 @app.route('/songs')
+@authorize
 def search():
     SEARCH_PHRASE = request.args.get('query', '')
     TYPES = {'chords': 300, 'tabs': 200}
