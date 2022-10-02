@@ -1,11 +1,12 @@
 from .controller import *
+from app import app
 
 
-@router.route("/", methods=['GET'])
+@app.route("/", methods=['GET'])
 def hello_world():
     return "<p>Chordify WS. Hello World!</p>"
 
 
-@router.route("/ping", methods=['GET'])
-def hello_world():
+@app.route("/ping", methods=['GET'])
+def ping():
     return {'data': 'Server running...'}

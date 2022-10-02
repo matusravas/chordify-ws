@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 import json
 from app.utils.helpers import *
 from app import BASE_URL_TABS
-from app import router
+from app import app
+# from app import router
 from app.dtos import SearchMatch
 from app.dtos.dtos import SongMetaData
 import re
@@ -17,7 +18,8 @@ logger = logging.getLogger(__name__)
 # Todo setup logger
     
 
-@router.route('/songs')
+@app.route('/songs')
+@authorize
 def search():
     SEARCH_PHRASE = request.args.get('query', '')
     TYPES = {'chords': 300, 'tabs': 200}
@@ -77,7 +79,8 @@ def search():
     return response
     
     
-@router.route('/chords', methods=['GET'])
+@app.route('/chords', methods=['GET'])
+@authorize
 def search_chords():
     TAB_URL = request.args.get('tab', None)
     if not TAB_URL:
