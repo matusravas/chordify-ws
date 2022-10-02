@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import json
 from app.utils.auth import authorize
 from app.utils.helpers import *
-from app import BASE_URL_TABS
+from app import BASE_URL_SONGS, BASE_URL_CHORDS
 from app import app
 from app.dtos import SearchMatch
 from app.dtos.dtos import SongMetaData
@@ -31,10 +31,10 @@ def search():
     ORDER = request.args.get('order', 'rating_desc') # hitstotal_desc rating_desc
     
     if SEARCH_PHRASE == '':
-        path_search = f'{BASE_URL_TABS}/top/tabs?order={ORDER}&type=chords'
-        path_search = f'{BASE_URL_TABS}/top/tabs?order={ORDER}&type=chords'
+        path_search = f'{BASE_URL_SONGS}/top/tabs?order={ORDER}&type=chords'
+        path_search = f'{BASE_URL_SONGS}/top/tabs?order={ORDER}&type=chords'
     else:
-        path_search = f'{BASE_URL_TABS}/search.php?title={SEARCH_PHRASE}&type={TYPE}&page={PAGE}'
+        path_search = f'{BASE_URL_SONGS}/search.php?title={SEARCH_PHRASE}&type={TYPE}&page={PAGE}'
     page = requests.get(path_search)
 
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -90,7 +90,7 @@ def search_chords():
         response.status_code = 400
         return response
     
-    path_chords = f'{BASE_URL_TABS}/{TAB_URL}'
+    path_chords = f'{BASE_URL_CHORDS}/tab/{TAB_URL}'
     page = requests.get(path_chords)
 
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -114,6 +114,6 @@ def search_chords():
                 </html>
                 '''
     return {'ok': True, 'data': html_page} #render_template_string(html_page)
-    return render_template_string(html_page)
+    # return render_template_string(html_page)
 
 
