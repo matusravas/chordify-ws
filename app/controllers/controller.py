@@ -1,45 +1,23 @@
 import itertools
 import logging
 from flask import jsonify, request, render_template_string
-from flask_jwt_extended import jwt_required
-from typing import Dict, List
+from typing import List
 import requests
 from bs4 import BeautifulSoup
 import json
+from app.utils.auth import authorize
+from app.utils.helpers import *
+from app import BASE_URL_TABS
 from app import app
 from app.dtos import SearchMatch
 from app.dtos.dtos import SongMetaData
 import re
 
-from app.utils.helpers import authorize
+from app.utils.auth import authorize
 
 logger = logging.getLogger(__name__)
 
 # Todo setup logger
-
-BASE_URL = 'https://tabs.ultimate-guitar.com'
-BASE_URL_TAB = 'https://tabs.ultimate-guitar.com/tab/'
-
-
-@app.route("/api", methods=['GET'])
-@authorize
-# @jwt_re
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-
-def sort_fun_tabs(e: Dict):
-    if 'votes' in e and 'rating' in e:
-        return e['votes'] * e['rating']
-    else:  
-        return -1
-
-
-def sort_fun_hits(e: Dict):
-    if 'hits' in e:
-        return int(e['hits'])
-    else:  
-        return -1
     
 
 @app.route('/songs')
@@ -53,9 +31,10 @@ def search():
     ORDER = request.args.get('order', 'rating_desc') # hitstotal_desc rating_desc
     
     if SEARCH_PHRASE == '':
-        path_search = f'https://www.ultimate-guitar.com/top/tabs?order={ORDER}&type=chords'
+        path_search = f'{BASE_URL_TABS}/top/tabs?order={ORDER}&type=chords'
+        path_search = f'{BASE_URL_TABS}/top/tabs?order={ORDER}&type=chords'
     else:
-        path_search = f'https://www.ultimate-guitar.com/search.php?title={SEARCH_PHRASE}&type={TYPE}&page={PAGE}'
+        path_search = f'{BASE_URL_TABS}/search.php?title={SEARCH_PHRASE}&type={TYPE}&page={PAGE}'
     page = requests.get(path_search)
 
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -103,6 +82,7 @@ def search():
     
     
 @app.route('/chords', methods=['GET'])
+@authorize
 def search_chords():
     TAB_URL = request.args.get('tab', None)
     if not TAB_URL:
@@ -110,7 +90,7 @@ def search_chords():
         response.status_code = 400
         return response
     
-    path_chords = f'{BASE_URL_TAB}/{TAB_URL}'
+    path_chords = f'{BASE_URL_TABS}/{TAB_URL}'
     page = requests.get(path_chords)
 
     soup = BeautifulSoup(page.text, 'html.parser')
